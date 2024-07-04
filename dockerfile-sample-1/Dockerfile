@@ -1,9 +1,16 @@
+# NOTE: this example is taken from the default Dockerfile for the official nginx Docker Hub Repo
+# https://hub.docker.com/_/nginx/
+
+# all images must have a FROM
+# usually from a minimal Linux distribution like debian or (even better) alpine
+# if you truly want to start with an empty container, use FROM scratch
 FROM debian:jessie
 
-MAINTAINER NGINX Docker Maintainers "docker-maint@nginx.com"
-
+# optional environment variable that's used in later lines and set as envvar when container is running
 ENV NGINX_VERSION 1.10.3-1~jessie
 
+# optional commands to run at shell inside container at build time
+# this one adds package repo nginx from nginx.org and installs it
 RUN apt-key adv --keyserver hkp://pgp.mit.edu:80 --recv-keys 573BFD6B3D8FBC641079A6ABABF5BD827BD9BF62 \
 	&& echo "deb http://nginx.org/packages/debian/ jessie nginx" >> /etc/apt/sources.list \
 	&& apt-get update \
@@ -22,6 +29,10 @@ RUN apt-key adv --keyserver hkp://pgp.mit.edu:80 --recv-keys 573BFD6B3D8FBC64107
 RUN ln -sf /dev/stdout /var/log/nginx/access.log \
 	&& ln -sf /dev/stderr /var/log/nginx/error.log
 
+# expose these ports on the docker virtual network
+# you still need to use -p or -P to open/forward these ports on host
 EXPOSE 80 443
 
+# required: run this command when container is launched
+# only one CMD allowed, so if there are multiple, last one wins
 CMD ["nginx", "-g", "daemon off;"]
